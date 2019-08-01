@@ -1,0 +1,63 @@
+<html>
+<head><h2>Crux Soundboard</h2></head>
+<body onload="generateBoard()">
+<style>
+
+h2
+{
+	
+}
+
+.grid-container {
+  display: inline-grid;
+  grid-gap: 10px 10px;
+  grid-template-columns: 100px 100px 100px;
+}
+</style>
+<script>
+	function generateButton(res)
+	{
+		var audioElement = document.createElement('audio');	
+		audioElement.setAttribute('id', res);
+		audioElement.setAttribute('src', 'crux/' + res + '.mp3');
+		audioElement.setAttribute('class', 'grid-item');
+		document.body.appendChild(audioElement);
+		
+		var div = document.getElementById('board');
+		var buttonElement = document.createElement('button');
+		buttonElement.setAttribute('onclick', 'document.getElementById(\'' + res +'\').play()');
+		buttonElement.innerHTML = res;
+		div.appendChild(buttonElement);
+	}	
+
+	function generateBoard()
+	{
+		generateButton('aggiusta-il-mic');	
+		generateButton('andiamo-con-ordine');
+		generateButton('appassionato-di-odori');
+		generateButton('arrivederci-grazie');
+		generateButton('aggiusta-il-mic');
+		generateButton('andiamo-con-ordine');
+		generateButton('appassionato-di-odori');
+		generateButton('arrivederci-grazie');
+		generateButton('beh-amico-mio');
+		generateButton('chi-sei');
+		generateButton('ciao-ciao');
+		generateButton('giu-questo-infame');
+		generateButton('mhai-rotto-i-coglioni-ciao');
+		generateButton('non-me-ne-frega-niente');
+		generateButton('non-sento-imbecille');
+		generateButton('perch‚-non-chiami-bene');
+		generateButton('se-non-lhai-capito');
+		generateButton('spiegami-bene');
+		generateButton('stai-zitto-nattimo');
+		generateButton('togli-il-vivavoce');
+		generateButton('via-via');
+	}
+</script>
+
+<br/>
+<div id="board" class="grid-container">   
+</div>
+</body>
+</html>
