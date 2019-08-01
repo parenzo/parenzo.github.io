@@ -15,7 +15,7 @@ h2 {
 }
 	
 button {
-   font-size: large;
+   font-size: 20pt;
    font-family: "Verdana", Geneva, sans-serif;
 }
 </style>
@@ -31,7 +31,7 @@ button {
 		var div = document.getElementById('board');
 		var buttonElement = document.createElement('button');
 		buttonElement.setAttribute('onclick', 'document.getElementById(\'' + res +'\').play()');
-		buttonElement.innerHTML = res;
+		buttonElement.innerHTML = res.replace(/-/g, ' ');;
 		div.appendChild(buttonElement);
 	}	
 
