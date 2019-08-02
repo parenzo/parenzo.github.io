@@ -57,29 +57,11 @@ button {
 		generateButton('stai-zitto-nattimo');
 		generateButton('togli-il-vivavoce');
 		generateButton('via-via');
-		
-		var button = document.getElementById('share');
-		// Aggiungo un listener che resta in ascolto del click
-		// ed esegue la funzione specificata
-		button.addEventListener('click', function(evt){
-			if (navigator.share !== undefined) {
-		navigator.share({
-		  title: 'Crux dice...',
-		  url  : 'http://parenzo.github.io/crux/puttanata.mp3'
-		})
-		.then(() => console.log('Shared successfully'))
-		.catch((error) => console.log('An error has occurred'));
-		  } else {
-			console.log('Your browser doesn\'t support Web Share API');
-		  }
-		}, false);
-		}
 	}
 </script>
 
 <br/>
 <div id="board" class="grid-container">
-	<button type="button" id="share"><span>Share</span></button>
 </div>
 </body>
 </html>
