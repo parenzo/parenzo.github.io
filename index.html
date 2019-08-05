@@ -36,12 +36,28 @@ button {
 		return "btn_" + id;
 	}
 	
+	function stopAudio(audio)
+	{
+		audio.pause();
+		audio.currentTime = 0;
+		document.getElementById(buttonId(audio.id)).className = "";
+	}
+	
+	function playAudio(audio)
+	{
+		audio.play();
+		document.getElementById(buttonId(audio.id)).className = "playingButton";		
+	}
+	
 	function btnOnClick(id)
 	{
 		var audio = document.getElementById(id);	
-		audio.play();
-		var btn = document.getElementById(buttonId(id));
-		btn.className = "playingButton";		
+		if (audio.paused) {
+			stopAudio(audio);
+		}
+		else {
+			playAudio(audio);
+		}		
 	}
 
 	function audioOnEnded(id)
@@ -72,9 +88,7 @@ button {
 		document.getElementById('stopButton').onclick = function() {
 			var sounds = document.getElementsByTagName('audio');
 			for(i=0; i<sounds.length; i++) {
-				sounds[i].pause();
-				sounds[i].currentTime = 0;
-				document.getElementById(buttonId(sounds[i].id)).className = "";
+				stopAudio(sounds[i]);				
 			}
 		};
 		
