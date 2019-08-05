@@ -18,6 +18,11 @@ button {
    font-size: 20pt;
    font-family: "Verdana", Geneva, sans-serif;
 }
+
+.stopButton {
+   color: rgb(245, 66, 114)
+}
+	
 </style>
 <script>
 	function generateButton(res)
@@ -36,7 +41,12 @@ button {
 	}	
 
 	function generateBoard()
-	{		
+	{	
+		document.getElementById('stopButton').onclick = function() {
+			var sounds = document.getElementsByTagName('audio');
+			for(i=0; i<sounds.length; i++) sounds[i].pause();
+		};
+		
 		generateButton('aggiusta-il-mic');
 		generateButton('andiamo-con-ordine');
 		generateButton('appassionato-di-odori');
@@ -74,6 +84,7 @@ button {
 
 <br/>
 <div id="board" class="grid-container">
+<button class="stopButton" id="stopButton">Stop</button>
 </div>
 </body>
 </html>
