@@ -44,7 +44,10 @@ button {
 	{	
 		document.getElementById('stopButton').onclick = function() {
 			var sounds = document.getElementsByTagName('audio');
-			for(i=0; i<sounds.length; i++) sounds[i].pause();
+			for(i=0; i<sounds.length; i++) {
+				sounds[i].pause();
+				sounds[i].currentTime = 0;
+			}
 		};
 		
 		generateButton('aggiusta-il-mic');
