@@ -25,20 +25,41 @@ button {
 	
 </style>
 <script>
-	function generateButton(res)
+	function buttonId(id)
+	{
+		return "btn_" + id;
+	}
+	
+	function btnOnClick(id)
+	{
+		var audio = document.getElementById(id);	
+		audio.play();
+		var btn = document.getElementById(buttonId(id));
+		btn.className = "playingButton";		
+	}
+
+	function audioOnEnded(id)
+	{
+		var btn = document.getElementById(buttonId(id));
+		btn.className = "";
+	}
+
+	function generateButton(id)
 	{
 		var audioElement = document.createElement('audio');	
-		audioElement.setAttribute('id', res);
-		audioElement.setAttribute('src', 'crux/' + res + '.mp3');
+		audioElement.setAttribute('id', id);
+		audioElement.setAttribute('src', 'crux/' + id + '.mp3');
 		audioElement.setAttribute('class', 'grid-item');
+		audioElement.setAttribute('onended', 'audioOnEnded(\'' + id +'\')');
 		document.body.appendChild(audioElement);
 		
 		var div = document.getElementById('board');
-		var buttonElement = document.createElement('button');
-		buttonElement.setAttribute('onclick', 'document.getElementById(\'' + res +'\').play()');
-		buttonElement.innerHTML = res.replace(/-/g, ' ');;
+		var buttonElement = document.createElement('button');	
+		buttonElement.setAttribute('id', buttonId(id));	
+		buttonElement.setAttribute('onclick', 'btnOnClick(\'' + id +'\')');
+		buttonElement.innerHTML = id.replace(/-/g, ' ');
 		div.appendChild(buttonElement);
-	}	
+	}		
 
 	function generateBoard()
 	{	
@@ -47,6 +68,7 @@ button {
 			for(i=0; i<sounds.length; i++) {
 				sounds[i].pause();
 				sounds[i].currentTime = 0;
+				document.getElementById(buttonId(sounds[i].id)).className = "";
 			}
 		};
 		
