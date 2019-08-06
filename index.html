@@ -1,11 +1,15 @@
 <html>
 <head>
 <title>Crux Soundboard</title>
-<h2>Crux Soundboard</h2></head>
-<body onload="generateBoard()">
+<body onload="createMainBoard()">
 <style>
 
 h2 {
+	font-family: "Verdana", Geneva, sans-serif;
+}
+
+h3 {
+	font-family: "Verdana", Geneva, sans-serif;
 }
 
 .grid-container {
@@ -15,15 +19,22 @@ h2 {
    width: 100vw;
    height: 80vh;
 }
-	
-button {
-   font-size: 20pt;
-   font-family: "Verdana", Geneva, sans-serif;
+
+.jingle-container {
+   display: inline-grid;
+   grid-gap: 10px 10px;
+   grid-template-columns: 30% 30% 30%; 
+   width: 100vw;   
 }
 
-.playingButton {	
-	background-color: rgb(52, 235, 146);
-}	
+button {	
+   	font-size: 20pt;
+   	font-family: "Verdana", Geneva, sans-serif;
+}
+
+.playingButton {
+	background: linear-gradient(to right, rgb(52, 235, 146) 100%, white 0%);
+}
 	
 .stopButton {
    color: rgb(245, 66, 114)
@@ -66,24 +77,25 @@ button {
 		btn.className = "";
 	}
 
-	function generateButton(id)
+	function createAudioButton(board, id)
 	{
 		var audioElement = document.createElement('audio');	
 		audioElement.setAttribute('id', id);
-		audioElement.setAttribute('src', 'crux/' + id + '.mp3');
+		audioElement.setAttribute('src', board + '/' + id + '.mp3');
 		audioElement.setAttribute('class', 'grid-item');
 		audioElement.setAttribute('onended', 'audioOnEnded(\'' + id +'\')');
 		document.body.appendChild(audioElement);
-		
-		var div = document.getElementById('board');
+				
 		var buttonElement = document.createElement('button');	
 		buttonElement.setAttribute('id', buttonId(id));	
 		buttonElement.setAttribute('onclick', 'btnOnClick(\'' + id +'\')');
 		buttonElement.innerHTML = id.replace(/-/g, ' ');
+		
+		var div = document.getElementById(board);
 		div.appendChild(buttonElement);
 	}		
 
-	function generateBoard()
+	function createMainBoard()
 	{	
 		document.getElementById('stopButton').onclick = function() {
 			var sounds = document.getElementsByTagName('audio');
@@ -92,52 +104,77 @@ button {
 			}
 		};
 		
-		generateButton('aggiusta-il-mic');
-		generateButton('amica-mia');
-		generateButton('andiamo-con-ordine');		
-		generateButton('appassionato-di-odori');
-		generateButton('arrivederci-grazie');
-		generateButton('beh-amico-mio');
-		generateButton('che-testa-di-cazzo');
-		generateButton('chi-sei');
-		generateButton('ciao-ciao');
-		generateButton('fermi-tutti');		
-		generateButton('giu-questo-infame');
-		generateButton('glory-hole');
-		generateButton('italiani');
-		generateButton('la-cosa-sessuale-più-incredibile');
-		generateButton('lei-non-sa-squirting');
-		generateButton('ma-sti-cazzi');
-		generateButton('mai-piaciuta-la-patata');
-		generateButton('mhai-rotto-i-coglioni-ciao');
-		generateButton('monografia-sullo-squirting');
-		generateButton('non-me-ne-frega-niente');
-		generateButton('non-sento-imbecille');
-		generateButton('parentesi-inutili');
-		generateButton('per-caso-tu-squirti');
-		generateButton('perché-non-chiami-bene');
-		generateButton('puttanata');		
-		generateButton('qualcosa-di-grave');
-		generateButton('se-non-lhai-capito');
-		generateButton('signora-aurora');
-		generateButton('sono-cruciani');
-		generateButton('sono-un-puttaniere');
-		generateButton('spiegami-bene');
-		generateButton('stai-zitto-nattimo');
-		generateButton('togli-il-vivavoce');
-		generateButton('top-assoluto');
-		generateButton('vado-ai-pazzi');
-		generateButton('via-via');
-		generateButton('FEDE_parenzooo');
-		generateButton('FEDE_porca_puttana');
-		generateButton('EXTRA-il-signor-giancarlo');
-		generateButton('EXTRA-fede-figura-di-merda');		
+		var cruxSounds = [
+			"aggiusta-il-mic",
+			"amica-mia",
+			"andiamo-con-ordine",		
+			"appassionato-di-odori",
+			"arrivederci-grazie",
+			"beh-amico-mio",
+			"che-testa-di-cazzo",
+			"chi-sei",
+			"ciao-ciao",
+			"fermi-tutti",		
+			"giu-questo-infame",
+			"glory-hole",
+			"italiani",
+			"la-cosa-sessuale-più-incredibile",
+			"lei-non-sa-squirting",
+			"ma-sti-cazzi",
+			"mai-piaciuta-la-patata",
+			"mhai-rotto-i-coglioni-ciao",
+			"monografia-sullo-squirting",
+			"non-me-ne-frega-niente",
+			"non-sento-imbecille",
+			"parentesi-inutili",
+			"per-caso-tu-squirti",
+			"perché-non-chiami-bene",
+			"puttanata",		
+			"qualcosa-di-grave",
+			"se-non-lhai-capito",
+			"signora-aurora",
+			"sono-cruciani",
+			"sono-un-puttaniere",
+			"spiegami-bene",
+			"stai-zitto-nattimo",
+			"togli-il-vivavoce",
+			"top-assoluto",
+			"vado-ai-pazzi",
+			"via-via",
+			"FEDE_parenzooo",
+			"FEDE_porca_puttana",
+			"EXTRA-il-signor-giancarlo",
+			"EXTRA-fede-figura-di-merda"
+		];
+
+		for(i=0; i<cruxSounds.length; i++) {
+			createAudioButton("crux", cruxSounds[i]);
+		}
+
+		var jingles = [
+			"fede",
+			"fenomeno",
+			"ibbrido-uccello-di-Hitchcock",
+			"pamplona",
+			"parenzo-mio-maestro",
+			"tefaf",
+			"trasmissione-della-minchia",
+		];
+
+		for(i=0; i<jingles.length; i++) {
+			createAudioButton("jingle", jingles[i]);
+		}
 	}
 </script>
 
+<h2>Crux Soundboard</h2></head>
 <br/>
-<div id="board" class="grid-container">
+<div id="crux" class="grid-container">
 <button class="stopButton" id="stopButton">Stop</button>
+</div>
+
+<h3>Jingles</h3>
+<div id="jingle" class="jingle-container">
 </div>
 </body>
 </html>
