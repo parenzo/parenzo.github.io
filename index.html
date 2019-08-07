@@ -28,7 +28,16 @@ button {
 .playingButton {
 	background: linear-gradient(to right, rgb(52, 235, 146) 100%, white 0%);
 }
-	
+
+.jingleButton {
+	background-color: white; 
+	border: 2px solid #008CBA;
+}
+
+.cruxButton {
+	border: 2px solid black;
+}
+
 .btnStop {
    	color: rgb(245, 66, 114);
 	grid-row-gap: 1ch;
@@ -50,17 +59,17 @@ button {
 		}		
 	}
 
-	function stopAudio(audio, button)
+	function stopAudio(sound, audio, button)
 	{
 		audio.pause();
 		audio.currentTime = 0;
-		button.className = "";
+		button.className = ButtonClass(sound);
 	}
 	
-	function playAudio(audio, button)
+	function playAudio(sound, audio, button)
 	{
 		audio.play();
-		button.className = "playingButton";		
+		button.className = "playingButton";	
 	}
 
 	function MakeAudioElementId(sound) {
@@ -81,10 +90,18 @@ button {
 		return audioElement;
 	}
 
+	function ButtonClass(sound) {
+		if (sound.tags.includes("jingle")){		
+			return "jingleButton";
+		}
+		return "cruxButton";
+	}
+
 	function MakeButtonElement(sound) {
 		var buttonElement = document.createElement('button');	
 		buttonElement.setAttribute('id', MakeButtonElementId(sound));	
 		buttonElement.innerHTML = sound.description.replace(/-/g, ' ');
+		buttonElement.className = ButtonClass(sound);
 		return buttonElement;
 	}
 
@@ -95,16 +112,16 @@ button {
 			this.button = MakeButtonElement(sound);
 
 			this.audio.onended = () => {			
-				this.button.className = "";
+				this.button.className = ButtonClass(sound);
 			};
 
 			this.button.onclick = () => {
 					
 				if (this.audio.paused) {
-					playAudio(this.audio, this.button);
+					playAudio(this.sound, this.audio, this.button);
 				}
 				else {
-					stopAudio(this.audio, this.button);
+					stopAudio(this.sound, this.audio, this.button);
 				}	
 			};
 		}
@@ -114,7 +131,7 @@ button {
 		}
 
 		Stop() {
-			stopAudio(this.audio, this.button);
+			stopAudio(this.sound, this.audio, this.button);
 		}
 	}
 
