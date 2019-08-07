@@ -12,6 +12,13 @@ h3 {
 	font-family: "Verdana", Geneva, sans-serif;
 }
 
+.grid-header {
+   display: inline-grid;
+   grid-gap: 10px 10px;
+   grid-template-columns: 17% 18% 18% 18% 18%;
+   width: 100vw;  
+}
+
 .grid-container {
    display: inline-grid;
    grid-gap: 10px 10px;
@@ -139,10 +146,10 @@ button {
 		constructor(sounds) {
 			this.data = {};
 
-			for(var i in sounds) {
-				var boardSound = new BoardSound(sounds[i]);
-				this.data[sounds[i].resource] = boardSound;			
-			}
+			sounds.forEach( sound => {
+				var boardSound = new BoardSound(sound);
+				this.data[sound.resource] = boardSound;			
+			});
 		}
 
 		OnSound(soundId, f) {
@@ -167,11 +174,11 @@ button {
 		}
 		
 		Add(sounds) {
-			for (var i in sounds) {
-				this.soundsRepository.OnSound(sounds[i].resource, (boardSound) => {
+			sounds.forEach(sound => {
+				this.soundsRepository.OnSound(sound.resource, (boardSound) => {
 					boardSound.AppendTo(this.control);
 				});
-			}
+			});		
 		}
 
 		Replace(sounds) {
@@ -280,15 +287,31 @@ button {
 	function CreateAllSoundsBoard() {
 		board.Replace(MainSounds);
 	}
+
+	function ButtonSizeClicked() {				
+		var sizeBtn = document.getElementById("btn-font");
+		var turnBig = sizeBtn.innerHTML == "Grande";
+		var sizeProp = turnBig ? "xx-large" : "";
+		sizeBtn.innerHTML = turnBig ? "Piccolo" : "Grande";
+
+		var buttons = document.getElementsByTagName("button");				
+		for (var i=0; i<buttons.length; i++) {
+			buttons[i].style.fontSize = sizeProp;		
+		}
+		
+		sizeBtn.dataset.flag = false;
+	}
 </script>
 
 <h2>Crux Soundboard</h2></head>
 <br/>
 
-<div id="crux-header" class="grid-container">
+<div id="crux-header" class="grid-header">
 <button class="btnStop" id="btn-stop" onclick="repo.StopAll()">Stop</button>
+<button class="btnAll" id="btn-font" onclick="ButtonSizeClicked()">Grande</button>
 <button class="btnAll" id="btn-all" onclick="CreateAllSoundsBoard()">ALL</button>
 <button class="btnAll" id="btn-jingles" onclick="CreateJinglesBoard()">Jingles</button>
+<button class="btnAll" id="btn-custom" enabled="false">Custom</button>
 <br/>
 </div>
 
