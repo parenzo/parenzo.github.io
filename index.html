@@ -112,7 +112,7 @@ button {
 			this.audio = MakeAudioElement(sound);
 			this.button = MakeButtonElement(sound);
 
-			this.audio.onended = this.audio.onpause = () => { 
+			this.audio.onpause = () => { 
 				this.button.className = ButtonClass(sound);
 				onAudioEnded(this.sound, this.audio);
 			};
@@ -413,7 +413,7 @@ button {
 			var idx = 0;
 			repo.SubscribeToAudioEnded( "playlist", (sound, audio) => {			
 				if (this.playlistGoing && sound.resource == sounds[idx]) {
-					if (idx == sounds.length)
+					if (idx == sounds.length - 1)
 					{
 						sounds = shuffle(board.AvailableSounds());
 						idx = 0;
@@ -422,7 +422,7 @@ button {
 					{
 						idx += 1;
 					}
-					repo.Play(sounds[idx]);
+					repo.Play(sounds[idx]);				
 				}
 			});
 			this.playlistGoing = true;
@@ -436,7 +436,7 @@ button {
 
 <div id="crux-header" class="grid-header">
 <button class="btnStop" id="btn-stop">🛑 Ferma tutto</button>
-<button class="btnAll" id="btn-play">▶️ Playlist casuale</button>
+<button class="btnAll" id="btn-play">▶️ Avvia casuale</button>
 <button class="btnAll" id="btn-font">➕ Grande</button>
 <button class="btnAll" id="btn-all">Tutti</button>
 <button class="btnAll" id="btn-crux">Crux</button>
