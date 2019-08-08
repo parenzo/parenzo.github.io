@@ -15,7 +15,7 @@ h3 {
 .grid-header {
    display: inline-grid;
    grid-gap: 10px 10px;
-   grid-template-columns: 17% 18% 18% 18% 18%;
+   grid-template-columns: 17% 18% 16% 12% 12% 12%;
    width: 100vw;  
 }
 
@@ -51,8 +51,15 @@ button {
 }
 
 .btnAll {
-   	color: rgb(66, 194, 245);
+   	color: rgb(69, 66, 245);
 	grid-row-gap: 1ch;
+}
+
+.footer {
+	padding-top: 30px;
+	text-align: center;
+	font-size: 10pt;
+   	font-family: "Verdana", Geneva, sans-serif;
 }
 
 </style>
@@ -65,20 +72,7 @@ button {
 			this.tags = tags;
 		}		
 	}
-
-	function stopAudio(sound, audio, button)
-	{
-		audio.pause();
-		audio.currentTime = 0;
-		button.className = ButtonClass(sound);
-	}
 	
-	function playAudio(sound, audio, button)
-	{
-		audio.play();
-		button.className = "playingButton";	
-	}
-
 	function MakeAudioElementId(sound) {
 		return "audio_" + sound.resource;
 	}
@@ -113,43 +107,71 @@ button {
 	}
 
 	class BoardSound {
-		constructor(sound) {
+		constructor(sound, onClick, onAudioEnded) {
 			this.sound = sound;
 			this.audio = MakeAudioElement(sound);
 			this.button = MakeButtonElement(sound);
 
-			this.audio.onended = () => {			
+			this.audio.onended = this.audio.onpause = () => { 
 				this.button.className = ButtonClass(sound);
+				onAudioEnded(this.sound, this.audio);
 			};
 
-			this.button.onclick = () => {
-					
-				if (this.audio.paused) {
-					playAudio(this.sound, this.audio, this.button);
-				}
-				else {
-					stopAudio(this.sound, this.audio, this.button);
-				}	
-			};
+			this.audio.onplay = () => {
+				this.button.className = "playingButton";
+			};			
+
+			this.button.onclick = onClick;			
 		}
 
 		AppendTo(control) {
 			control.appendChild(this.button);
 		}
+		
+		Trigger() {
+			if (this.audio.paused) {
+				this.Play();
+			}
+			else {
+				this.Stop();
+			}
+		}
+
+		Play() {
+			this.audio.play();
+		}
 
 		Stop() {
-			stopAudio(this.sound, this.audio, this.button);
+			this.audio.pause();
+			this.audio.currentTime = 0;
 		}
 	}
 
 	class SoundsRepository {
 		constructor(sounds) {
 			this.data = {};
+			this.onAudioEnded = {};
 
 			sounds.forEach( sound => {
-				var boardSound = new BoardSound(sound);
+				var boardSound = new BoardSound(
+					sound, 
+					() => { this.Trigger(sound.resource); }, 
+					(s, a) => { 
+						for (var f in this.onAudioEnded){
+							this.onAudioEnded[f](s, a);
+						}
+					 }
+				);
 				this.data[sound.resource] = boardSound;			
 			});
+		}
+
+		SubscribeToAudioEnded(id, f) {
+			this.onAudioEnded[id] = f;
+		}
+
+		UbsubscribeToAudioEnded(id) {
+			delete this.onAudioEnded[id];
 		}
 
 		OnSound(soundId, f) {
@@ -163,18 +185,39 @@ button {
 				this.data[i].Stop();
 			}
 		}
+
+		ForEach(f) {
+			for (var i in this.data) {
+				f(this.data[i].sound, this.data[i].audio, this.data[i].button);
+			}
+		}
+
+		Trigger(soundId) {
+			if (this.data[soundId] != null) {				
+				this.data[soundId].Trigger();
+			}
+		}
+
+		Play(soundId) {
+			if (this.data[soundId] != null) {				
+				this.data[soundId].Play();
+			}
+		}
 	}	
 
 	class Board {
 		constructor(control, repo) {
 			this.control = control;
 			this.soundsRepository = repo;
-	
+			this.sounds = [];
+
 			this.Clear();
 		}
 		
 		Add(sounds) {
 			sounds.forEach(sound => {
+				this.sounds.push(sound.resource);
+
 				this.soundsRepository.OnSound(sound.resource, (boardSound) => {
 					boardSound.AppendTo(this.control);
 				});
@@ -182,14 +225,20 @@ button {
 		}
 
 		Replace(sounds) {
+			this.sounds = [];		
 			this.Clear();
 			this.Add(sounds);
 		}
 
 		Clear() {
+			this.sounds = [];
 			while (this.control.firstChild) {
     			this.control.removeChild(this.control.firstChild);
 			}
+		}
+
+		AvailableSounds() {
+			return this.sounds;
 		}
 	}
 
@@ -272,7 +321,14 @@ button {
 
 		repo = new SoundsRepository(MainSounds);
 		board = new Board(document.getElementById("crux"), repo);
-		
+		header = new HeaderManager(repo, 
+			document.getElementById("btn-stop"), 
+			document.getElementById("btn-font"), 
+			document.getElementById("btn-all"), 
+			document.getElementById("btn-jingles"), 
+			document.getElementById("btn-play"),
+			document.getElementById("btn-crux"));
+
 		CreateAllSoundsBoard();
 	}
 
@@ -284,22 +340,94 @@ button {
 		board.Replace(jingles);
 	}
 
+	function CreateCruxBoard() {
+		var cruxSounds = MainSounds.filter( (sound) => {
+			return sound.tags.includes("crux");
+		});
+
+		board.Replace(cruxSounds);
+	}
+
 	function CreateAllSoundsBoard() {
 		board.Replace(MainSounds);
 	}
-
-	function ButtonSizeClicked() {				
-		var sizeBtn = document.getElementById("btn-font");
-		var turnBig = sizeBtn.innerHTML == "Grande";
-		var sizeProp = turnBig ? "xx-large" : "";
-		sizeBtn.innerHTML = turnBig ? "Piccolo" : "Grande";
-
-		var buttons = document.getElementsByTagName("button");				
-		for (var i=0; i<buttons.length; i++) {
-			buttons[i].style.fontSize = sizeProp;		
+	
+	function shuffle(array) {
+		for(let i = array.length - 1; i > 0; i--){
+			const j = Math.floor(Math.random() * array.length)
+			const temp = array[i]
+			array[i] = array[j]
+			array[j] = temp
 		}
-		
-		sizeBtn.dataset.flag = false;
+		return array;
+	}
+
+	class HeaderManager {
+		constructor(soundRepo, stopBtn, fontBtn, filterAllBtn, filterJinglesBtn, playBtn, cruxBtn) {
+			this.soundRepo = soundRepo;
+			this.board = board;
+			this.sizeTurnBig = true;
+			this.playlistGoing = false;
+			this.stopBtn = stopBtn;
+			this.fontBtn = fontBtn;
+			this.filterAllBtn = filterAllBtn;
+			this.filterJinglesBtn = filterJinglesBtn;
+			this.playBtn = playBtn;
+			this.cruxBtn = cruxBtn;
+
+			stopBtn.onclick = () => { this.StopAll(); this.StopPlaylist(); };
+			this.playBtn.onclick = () => { this.StartPlaylist(); };
+			this.fontBtn.onclick = () => { this.FlipSize(); };
+			this.filterAllBtn.onclick = CreateAllSoundsBoard;
+			this.filterJinglesBtn.onclick = CreateJinglesBoard;
+			this.cruxBtn.onclick = CreateCruxBoard;
+		}
+
+		StopAll() {
+			repo.StopAll();
+		}
+
+		FlipSize() {					
+			var sizeProp = this.sizeTurnBig ? "xx-large" : "";
+			this.fontBtn.innerHTML = this.sizeTurnBig ? "➖ Piccolo" : "➕ Grande";
+
+			this.soundRepo.ForEach((sound, audio, button) => {
+				button.style.fontSize = sizeProp;		
+			});
+					
+			this.sizeTurnBig = !this.sizeTurnBig;
+		}
+
+		StopPlaylist() {
+			this.playlistGoing = false;
+			repo.UbsubscribeToAudioEnded("playlist");
+		}
+
+		StartPlaylist() {
+			this.StopAll();
+			if (this.playlistGoing) {
+				this.StopPlaylist();			
+			}
+
+			var sounds = shuffle(board.AvailableSounds());
+			var idx = 0;
+			repo.SubscribeToAudioEnded( "playlist", (sound, audio) => {			
+				if (this.playlistGoing && sound.resource == sounds[idx]) {
+					if (idx == sounds.length)
+					{
+						sounds = shuffle(board.AvailableSounds());
+						idx = 0;
+					}
+					else
+					{
+						idx += 1;
+					}
+					repo.Play(sounds[idx]);
+				}
+			});
+			this.playlistGoing = true;
+			repo.Play(sounds[idx]);
+		}
 	}
 </script>
 
@@ -307,16 +435,19 @@ button {
 <br/>
 
 <div id="crux-header" class="grid-header">
-<button class="btnStop" id="btn-stop" onclick="repo.StopAll()">Stop</button>
-<button class="btnAll" id="btn-font" onclick="ButtonSizeClicked()">Grande</button>
-<button class="btnAll" id="btn-all" onclick="CreateAllSoundsBoard()">ALL</button>
-<button class="btnAll" id="btn-jingles" onclick="CreateJinglesBoard()">Jingles</button>
-<button class="btnAll" id="btn-custom" enabled="false">Custom</button>
+<button class="btnStop" id="btn-stop">🛑 Ferma tutto</button>
+<button class="btnAll" id="btn-play">▶️ Playlist casuale</button>
+<button class="btnAll" id="btn-font">➕ Grande</button>
+<button class="btnAll" id="btn-all">Tutti</button>
+<button class="btnAll" id="btn-crux">Crux</button>
+<button class="btnAll" id="btn-jingles">Jingles</button>
 <br/>
 </div>
 
 <div id="crux" class="grid-container">
 </div>
+
+<div class="footer">Viva la libertà d'espressione</div>
 
 </body>
 </html>
