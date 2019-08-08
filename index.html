@@ -15,7 +15,7 @@ h3 {
 .grid-header {
    display: inline-grid;
    grid-gap: 10px 10px;
-   grid-template-columns: 17% 18% 16% 12% 12% 12%;
+   grid-template-columns: 14% 14% 12% 12% 12% 12% 12%;
    width: 100vw;  
 }
 
@@ -36,8 +36,13 @@ button {
 	background: linear-gradient(to right, rgb(52, 235, 146) 100%, white 0%);
 }
 
+.customFilterButton {
+	background-color: rgb(242, 245, 66);
+	grid-row-gap: 1ch;
+}
+
 .jingleButton {
-	background-color: white; 
+	background-color: white;
 	border: 2px solid #008CBA;
 }
 
@@ -53,6 +58,20 @@ button {
 .btnAll {
    	color: rgb(69, 66, 245);
 	grid-row-gap: 1ch;
+}
+
+.btnEditFav {
+	background-color: rgb(255, 230, 8);
+	color: white;
+	grid-row-gap: 1ch;
+}
+
+.fav-group button {
+	color: rgb(69, 66, 245);
+	grid-row-gap: 1ch;
+	display: block; /* Make the buttons appear below each other */
+	min-height: 50px;
+	width: 100%;
 }
 
 .footer {
@@ -121,7 +140,9 @@ button {
 				this.button.className = "playingButton";
 			};			
 
-			this.button.onclick = onClick;			
+			this.button.onclick = () => {
+				onClick(this.sound, this.button);
+			};			
 		}
 
 		AppendTo(control) {
@@ -151,11 +172,12 @@ button {
 		constructor(sounds) {
 			this.data = {};
 			this.onAudioEnded = {};
+			this.onButtonClick = (sound, button) => { this.Trigger(sound.resource); };
 
 			sounds.forEach( sound => {
 				var boardSound = new BoardSound(
 					sound, 
-					() => { this.Trigger(sound.resource); }, 
+					(sound, button) => { this.onButtonClick(sound, button); },
 					(s, a) => { 
 						for (var f in this.onAudioEnded){
 							this.onAudioEnded[f](s, a);
@@ -172,6 +194,14 @@ button {
 
 		UbsubscribeToAudioEnded(id) {
 			delete this.onAudioEnded[id];
+		}
+
+		OnButtonClick(f) {
+			this.onButtonClick = f;
+		}
+
+		OnButtonClickDefault() {
+			this.onButtonClick = (sound, button) => { this.Trigger(sound.resource); };
 		}
 
 		OnSound(soundId, f) {
@@ -327,9 +357,11 @@ button {
 			document.getElementById("btn-all"), 
 			document.getElementById("btn-jingles"), 
 			document.getElementById("btn-play"),
-			document.getElementById("btn-crux"));
+			document.getElementById("btn-crux"),
+			document.getElementById("btn-custom"),
+			document.getElementById("btn-makecustom"));
 
-		CreateAllSoundsBoard();
+		CreateAllSoundsBoard();		
 	}
 
 	function CreateJinglesBoard() {
@@ -363,24 +395,24 @@ button {
 	}
 
 	class HeaderManager {
-		constructor(soundRepo, stopBtn, fontBtn, filterAllBtn, filterJinglesBtn, playBtn, cruxBtn) {
-			this.soundRepo = soundRepo;
-			this.board = board;
+		constructor(soundRepo, stopBtn, fontBtn, filterAllBtn, filterJinglesBtn, playBtn, cruxBtn, customBtn, makeCustomBtn) {
+			this.soundRepo = soundRepo;			
 			this.sizeTurnBig = true;
 			this.playlistGoing = false;
-			this.stopBtn = stopBtn;
-			this.fontBtn = fontBtn;
-			this.filterAllBtn = filterAllBtn;
-			this.filterJinglesBtn = filterJinglesBtn;
-			this.playBtn = playBtn;
-			this.cruxBtn = cruxBtn;
+			this.isMakingCustomFilter = false;
+			this.customFilter = [];
+			this.fontBtn = fontBtn;					
+			this.fontBtn.onclick = () => { this.FlipSize(); };
+			this.makeCustomBtn = makeCustomBtn;
 
 			stopBtn.onclick = () => { this.StopAll(); this.StopPlaylist(); };
-			this.playBtn.onclick = () => { this.StartPlaylist(); };
-			this.fontBtn.onclick = () => { this.FlipSize(); };
-			this.filterAllBtn.onclick = CreateAllSoundsBoard;
-			this.filterJinglesBtn.onclick = CreateJinglesBoard;
-			this.cruxBtn.onclick = CreateCruxBoard;
+			playBtn.onclick = () => { this.OnPlayList(); };
+			customBtn.onclick = () => { this.ShowFavorites(); };
+			makeCustomBtn.onclick = () => { this.OnMakeCustomFilter(); };
+
+			filterAllBtn.onclick = CreateAllSoundsBoard;
+			filterJinglesBtn.onclick = CreateJinglesBoard;
+			cruxBtn.onclick = CreateCruxBoard;
 		}
 
 		StopAll() {
@@ -398,12 +430,18 @@ button {
 			this.sizeTurnBig = !this.sizeTurnBig;
 		}
 
+		ShowFavorites() {
+			board.Replace(this.customFilter);
+		}
+
 		StopPlaylist() {
 			this.playlistGoing = false;
 			repo.UbsubscribeToAudioEnded("playlist");
 		}
 
-		StartPlaylist() {
+		OnPlayList() {
+			if (this.isMakingCustomFilter)
+				return;
 			this.StopAll();
 			if (this.playlistGoing) {
 				this.StopPlaylist();			
@@ -413,20 +451,53 @@ button {
 			var idx = 0;
 			repo.SubscribeToAudioEnded( "playlist", (sound, audio) => {			
 				if (this.playlistGoing && sound.resource == sounds[idx]) {
-					if (idx == sounds.length - 1)
-					{
+					if (idx == sounds.length - 1) {
 						sounds = shuffle(board.AvailableSounds());
 						idx = 0;
-					}
-					else
-					{
+					} else {
 						idx += 1;
 					}
-					repo.Play(sounds[idx]);				
+					repo.Play(sounds[idx]);
 				}
 			});
 			this.playlistGoing = true;
 			repo.Play(sounds[idx]);
+		}
+
+		OnMakeCustomFilter() {
+			var newFilter = this.customFilter;
+
+			if (!this.isMakingCustomFilter) {
+				this.StopPlaylist();
+				this.StopAll();
+				this.soundRepo.ForEach((sound, audio, button) => {
+					if (newFilter.includes(sound))
+						button.className = "customFilterButton";
+				});
+				this.soundRepo.OnButtonClick( (sound, button) => {
+					var idx = newFilter.indexOf(sound);
+					if (idx != -1) {
+						newFilter.splice(idx, 1);
+						button.className = ButtonClass(sound);
+					} else {
+						newFilter.push(sound);
+						button.className = "customFilterButton";
+					}
+				});
+				this.makeCustomBtn.innerHTML = "Fatto";
+				this.makeCustomBtn.className = "btnEditFav";
+			} else {
+				this.soundRepo.OnButtonClickDefault();
+				this.soundRepo.ForEach((sound, audio, button) => {
+					button.className = ButtonClass(sound);
+				});
+				this.makeCustomBtn.innerHTML = "...";
+				this.makeCustomBtn.className = "";
+				this.customFilter = newFilter;
+				this.ShowFavorites();
+			}
+
+			this.isMakingCustomFilter = !this.isMakingCustomFilter;
 		}
 	}
 </script>
@@ -435,12 +506,16 @@ button {
 <br/>
 
 <div id="crux-header" class="grid-header">
-<button class="btnStop" id="btn-stop">🛑 Ferma tutto</button>
-<button class="btnAll" id="btn-play">▶️ Avvia casuale</button>
+<button class="btnStop" id="btn-stop">🛑 Ferma</button>
+<button class="btnAll" id="btn-play">▶️ Casuale</button>
 <button class="btnAll" id="btn-font">➕ Grande</button>
 <button class="btnAll" id="btn-all">Tutti</button>
 <button class="btnAll" id="btn-crux">Crux</button>
 <button class="btnAll" id="btn-jingles">Jingles</button>
+<div class="fav-group">
+		<button id="btn-custom">⭐ Preferiti</button>
+		<button id="btn-makecustom">...</button>
+	</div>
 <br/>
 </div>
 
