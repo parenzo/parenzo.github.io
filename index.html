@@ -84,6 +84,22 @@ button {
 </style>
 <script>
 
+	/* utils */
+	function shuffle(array) {
+		for(let i = array.length - 1; i > 0; i--){
+			const j = Math.floor(Math.random() * array.length)
+			const temp = array[i]
+			array[i] = array[j]
+			array[j] = temp
+		}
+		return array;
+	}
+
+	function sleep(ms) {
+  		return new Promise(resolve => setTimeout(resolve, ms));
+	}
+	// utils
+
 	class Sound {
 		constructor(resource, description, tags) {			
 			this.resource = resource;
@@ -135,7 +151,7 @@ button {
 			this.audio = MakeAudioElement(sound);
 			this.button = MakeButtonElement(sound);
 
-			this.audio.onpause = () => { 
+			this.audio.onpause = () => { 	
 				this.button.className = ButtonClass(this.sound);
 				onAudioEnded(this.sound, this.audio);
 			};
@@ -167,8 +183,6 @@ button {
 		}
 
 		Stop() {
-			// changing this class is needed only for avoiding async "pause()" issues
-			this.button.className = ButtonClass(this.sound);
 			this.audio.pause();
 			this.audio.currentTime = 0;
 		}
@@ -415,16 +429,6 @@ button {
 	function CreateAllSoundsBoard() {
 		board.Replace(MainSounds.map(SoundId));
 	}
-	
-	function shuffle(array) {
-		for(let i = array.length - 1; i > 0; i--){
-			const j = Math.floor(Math.random() * array.length)
-			const temp = array[i]
-			array[i] = array[j]
-			array[j] = temp
-		}
-		return array;
-	}
 
 	function LoadFavorites() {
 		var localfavs = localStorage.getItem("board-favs");
@@ -485,7 +489,6 @@ button {
 				return;
 
 			this.StopAll();
-
 			var sounds = shuffle(board.AvailableSounds());
 			var idx = 0;
 			repo.SubscribeToAudioEnded( "playlist", (sound, audio) => {			
@@ -503,12 +506,13 @@ button {
 			repo.Play(sounds[idx]);
 		}
 
-		OnMakeCustomFilter() {
+		async OnMakeCustomFilter() {
 			var newFilter = this.customFilter;
 			
 			if (!this.isMakingCustomFilter) {
 				this.StopAll();
-				
+				await sleep(1); // tackle "async onpause" problem
+
 				this.soundRepo.ForEach((sound, audio, button) => {
 					if (newFilter.includes(sound.resource)){
 						button.className = "customFilterButton";
@@ -554,9 +558,9 @@ button {
 <button class="btnAll" id="btn-crux">Crux</button>
 <button class="btnAll" id="btn-jingles">Jingles</button>
 <div class="fav-group">
-		<button id="btn-custom">⭐ Preferiti</button>
-		<button id="btn-makecustom">...</button>
-	</div>
+	<button id="btn-custom">⭐ Preferiti</button>
+	<button id="btn-makecustom">...</button>
+</div>
 <br/>
 </div>
 
