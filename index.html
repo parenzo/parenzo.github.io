@@ -92,6 +92,10 @@ button {
 		}		
 	}
 	
+	function SoundId(sound) {
+		return sound.resource;
+	}
+
 	function MakeAudioElementId(sound) {
 		return "audio_" + sound.resource;
 	}
@@ -131,8 +135,7 @@ button {
 			this.audio = MakeAudioElement(sound);
 			this.button = MakeButtonElement(sound);
 
-			this.audio.onpause = () => { 
-				this.button.className = ButtonClass(sound);
+			this.audio.onpause = () => { 							
 				onAudioEnded(this.sound, this.audio);
 			};
 
@@ -163,6 +166,7 @@ button {
 		}
 
 		Stop() {
+			this.button.className = ButtonClass(this.sound);
 			this.audio.pause();
 			this.audio.currentTime = 0;
 		}
@@ -244,20 +248,19 @@ button {
 			this.Clear();
 		}
 		
-		Add(sounds) {
-			sounds.forEach(sound => {
-				this.sounds.push(sound.resource);
-
-				this.soundsRepository.OnSound(sound.resource, (boardSound) => {
+		Add(soundIds) {
+			this.sounds = this.sounds.concat(soundIds);
+			soundIds.forEach(soundId => {
+				this.soundsRepository.OnSound(soundId, (boardSound) => {
 					boardSound.AppendTo(this.control);
 				});
 			});		
 		}
 
-		Replace(sounds) {
+		Replace(soundIds) {
 			this.sounds = [];		
 			this.Clear();
-			this.Add(sounds);
+			this.Add(soundIds);
 		}
 
 		Clear() {
@@ -396,7 +399,7 @@ button {
 			return sound.tags.includes("jingle");
 		});
 
-		board.Replace(jingles);
+		board.Replace(jingles.map(SoundId));
 	}
 
 	function CreateCruxBoard() {
@@ -404,11 +407,11 @@ button {
 			return sound.tags.includes("crux");
 		});
 
-		board.Replace(cruxSounds);
+		board.Replace(cruxSounds.map(SoundId));
 	}
 
 	function CreateAllSoundsBoard() {
-		board.Replace(MainSounds);
+		board.Replace(MainSounds.map(SoundId));
 	}
 	
 	function shuffle(array) {
@@ -432,7 +435,7 @@ button {
 	function SaveFavorites(favs) {
 		localStorage.setItem("board-favs", JSON.stringify(favs));
 	}
-	
+
 	class HeaderManager {
 		constructor(soundRepo, stopBtn, fontBtn, filterAllBtn, filterJinglesBtn, playBtn, cruxBtn, customBtn, makeCustomBtn) {
 			this.soundRepo = soundRepo;			
@@ -444,7 +447,7 @@ button {
 			this.fontBtn.onclick = () => { this.FlipSize(); };
 			this.makeCustomBtn = makeCustomBtn;
 
-			stopBtn.onclick = () => { this.StopAll(); this.StopPlaylist(); };
+			stopBtn.onclick = () => { this.StopAll(); };
 			playBtn.onclick = () => { this.OnPlayList(); };
 			customBtn.onclick = () => { this.ShowFavorites(); };
 			makeCustomBtn.onclick = () => { this.OnMakeCustomFilter(); };
@@ -456,6 +459,8 @@ button {
 
 		StopAll() {
 			repo.StopAll();
+			this.playlistGoing = false;
+			repo.UbsubscribeToAudioEnded("playlist");
 		}
 
 		FlipSize() {					
@@ -473,18 +478,11 @@ button {
 			board.Replace(this.customFilter);
 		}
 
-		StopPlaylist() {
-			this.playlistGoing = false;
-			repo.UbsubscribeToAudioEnded("playlist");
-		}
-
 		OnPlayList() {
 			if (this.isMakingCustomFilter)
 				return;
+
 			this.StopAll();
-			if (this.playlistGoing) {
-				this.StopPlaylist();			
-			}
 
 			var sounds = shuffle(board.AvailableSounds());
 			var idx = 0;
@@ -505,21 +503,24 @@ button {
 
 		OnMakeCustomFilter() {
 			var newFilter = this.customFilter;
-
+			
 			if (!this.isMakingCustomFilter) {
-				this.StopPlaylist();
 				this.StopAll();
+				
 				this.soundRepo.ForEach((sound, audio, button) => {
-					if (newFilter.includes(sound))
+					if (newFilter.includes(sound.resource)){
+						console.log(sound.resource + " -> " + button.className);
+						
 						button.className = "customFilterButton";
+					}
 				});
 				this.soundRepo.OnButtonClick( (sound, button) => {
-					var idx = newFilter.indexOf(sound);
+					var idx = newFilter.indexOf(sound.resource);
 					if (idx != -1) {
 						newFilter.splice(idx, 1);
 						button.className = ButtonClass(sound);
 					} else {
-						newFilter.push(sound);
+						newFilter.push(sound.resource);
 						button.className = "customFilterButton";
 					}
 				});
@@ -555,16 +556,13 @@ button {
 <div class="fav-group">
 		<button id="btn-custom">⭐ Preferiti</button>
 		<button id="btn-makecustom">...</button>
-</div>
+	</div>
 <br/>
 </div>
 
 <div id="crux" class="grid-container">
 </div>
 
-<div class="footer">
-	Viva la libertà d'espressione - Sito non ufficiale, tutti i diritti riservati a <a href src="http://www.radio24.ilsole24ore.com">Radio24/Il sole 24 ore</a>
-</div>
-
+<div class="footer">Viva la libertà d'espressione - Sito non ufficiale, tutti i diritti riservati a <a href src="http://www.radio24.ilsole24ore.com">Radio24/Il sole 24 ore</a></div>
 </body>
 </html>
