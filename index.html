@@ -421,13 +421,25 @@ button {
 		return array;
 	}
 
+	function LoadFavorites() {
+		var localfavs = localStorage.getItem("board-favs");
+		if (localfavs != null) {			
+			return JSON.parse(localfavs);
+		}
+		return [];
+	}
+
+	function SaveFavorites(favs) {
+		localStorage.setItem("board-favs", JSON.stringify(favs));
+	}
+	
 	class HeaderManager {
 		constructor(soundRepo, stopBtn, fontBtn, filterAllBtn, filterJinglesBtn, playBtn, cruxBtn, customBtn, makeCustomBtn) {
 			this.soundRepo = soundRepo;			
 			this.sizeTurnBig = true;
 			this.playlistGoing = false;
 			this.isMakingCustomFilter = false;
-			this.customFilter = [];
+			this.customFilter = LoadFavorites();
 			this.fontBtn = fontBtn;					
 			this.fontBtn.onclick = () => { this.FlipSize(); };
 			this.makeCustomBtn = makeCustomBtn;
@@ -521,6 +533,7 @@ button {
 				this.makeCustomBtn.innerHTML = "...";
 				this.makeCustomBtn.className = "";
 				this.customFilter = newFilter;
+				SaveFavorites(newFilter);
 				this.ShowFavorites();
 			}
 
