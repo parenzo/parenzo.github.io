@@ -135,7 +135,8 @@ button {
 			this.audio = MakeAudioElement(sound);
 			this.button = MakeButtonElement(sound);
 
-			this.audio.onpause = () => { 							
+			this.audio.onpause = () => { 
+				this.button.className = ButtonClass(this.sound);
 				onAudioEnded(this.sound, this.audio);
 			};
 
@@ -166,6 +167,7 @@ button {
 		}
 
 		Stop() {
+			// changing this class is needed only for avoiding async "pause()" issues
 			this.button.className = ButtonClass(this.sound);
 			this.audio.pause();
 			this.audio.currentTime = 0;
