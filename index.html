@@ -509,8 +509,6 @@ button {
 				
 				this.soundRepo.ForEach((sound, audio, button) => {
 					if (newFilter.includes(sound.resource)){
-						console.log(sound.resource + " -> " + button.className);
-						
 						button.className = "customFilterButton";
 					}
 				});
