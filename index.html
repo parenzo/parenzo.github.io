@@ -46,6 +46,11 @@ button {
 	border: 2px solid #008CBA;
 }
 
+.extraButton {
+	background-color: #effbff;
+	border: 2px solid #00befd;
+}
+
 .cruxButton {
 	border: 2px solid black;
 }
@@ -134,6 +139,9 @@ button {
 		if (sound.tags.includes("jingle")){		
 			return "jingleButton";
 		}
+		else if (sound.tags.includes("extra")){		
+			return "extraButton";
+		}
 		return "cruxButton";
 	}
 
@@ -193,7 +201,7 @@ button {
 			this.data = {};
 			this.onAudioEnded = {};
 			this.onButtonClick = (sound, button) => { this.Trigger(sound.resource); };
-
+							
 			sounds.forEach( sound => {
 				var boardSound = new BoardSound(
 					sound, 
@@ -302,8 +310,8 @@ button {
 			new Sound("crux/appassionato-di-odori.mp3", "appassionato di odori", ["crux"]),
 			new Sound("crux/arrivederci-grazie.mp3", "arrivederci, grazie", ["crux"]),
 			new Sound("crux/beh-amico-mio.mp3", "beh amico mio", ["crux"]),
-			new Sound("crux/breaking-news.mp3", "breaking news", ["crux"]),
-			new Sound("crux/cervello-pigne.mp3", "nel cervello pigne", ["crux", "microfono"]),
+			new Sound("crux/breaking-news.mp3", "breaking news", ["crux"]),			
+			new Sound("crux/oltre-al-delirio.mp3", "che cosa vuoi oltre al delirio?", ["crux", "microfono"]),
 			new Sound("crux/che-stracazzo-vuoi.mp3", "che stracazzo vuoi", ["crux"]),
 			new Sound("crux/che-testa-di-cazzo.mp3", "che testa di cazzo", ["crux"]),
 			new Sound("crux/chi-sei.mp3", "chi sei?", ["crux"]),
@@ -328,9 +336,9 @@ button {
 			new Sound("crux/mai-piaciuta-la-patata.mp3", "mai piaciuta la patata?", ["crux"]),
 			new Sound("crux/mhai-rotto-i-coglioni-ciao.mp3", "m'hai rotto i coglioni ciao", ["crux"]),
 			new Sound("crux/monografia-sullo-squirting.mp3", "monografia sullo squirting", ["crux"]),
+			new Sound("crux/cervello-pigne.mp3", "nel cervello pigne", ["crux", "microfono"]),
 			new Sound("crux/non-me-ne-frega-niente.mp3", "non me ne frega niente", ["crux"]),
-			new Sound("crux/non-sento-imbecille.mp3", "non sento, imbecille", ["crux"]),
-			new Sound("crux/oltre-al-delirio.mp3", "che cosa vuoi oltre al delirio?", ["crux", "microfono"]),
+			new Sound("crux/non-sento-imbecille.mp3", "non sento, imbecille", ["crux"]),			
 			new Sound("crux/parentesi-inutili.mp3", "parentesi inutili", ["crux"]),
 			new Sound("crux/per-caso-tu-squirti.mp3", "per caso tu squirti?", ["crux"]),
 			new Sound("crux/perche-hai-chiamato.mp3", "perché hai chiamato?", ["crux", "microfono"]),
@@ -354,7 +362,7 @@ button {
 			new Sound("crux/stupendo.mp3", "stupendo", ["crux", "microfono"]),
 			new Sound("crux/togli-il-vivavoce.mp3", "togli il vivavoce", ["crux"]),
 			new Sound("crux/top-assoluto.mp3", "top assoluto", ["crux"]),
-			new Sound("crux/vabbè-allora.mp3", "vabè allora?", ["crux"]),
+			new Sound("crux/vabbè-allora.mp3", "vabbè allora?", ["crux"]),
 			new Sound("crux/vado-ai-pazzi.mp3", "vado ai pazzi", ["crux"]),
 			new Sound("crux/via-via.mp3", "via via", ["crux"]),
 
