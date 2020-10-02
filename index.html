@@ -154,7 +154,7 @@ button {
 	}
 
 	class BoardSound {
-		constructor(sound, onClick, onAudioEnded) {
+		constructor(sound, onClick, onCtrlClick, onAudioEnded) {
 			this.sound = sound;
 			this.audio = MakeAudioElement(sound);
 			this.button = MakeButtonElement(sound);
@@ -169,7 +169,14 @@ button {
 			};			
 
 			this.button.onclick = () => {
-				onClick(this.sound, this.button);
+				if (event.ctrlKey)
+				{
+					onCtrlClick(this.sound, this.button);
+				}
+				else
+				{
+					onClick(this.sound, this.button);
+				}
 			};			
 		}
 
@@ -206,6 +213,7 @@ button {
 				var boardSound = new BoardSound(
 					sound, 
 					(sound, button) => { this.onButtonClick(sound, button); },
+					(sound, button) => { this.StopAll(); this.onButtonClick(sound, button); },
 					(s, a) => { 
 						for (var f in this.onAudioEnded){
 							this.onAudioEnded[f](s, a);
