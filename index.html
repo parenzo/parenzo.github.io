@@ -125,12 +125,33 @@ button {
 		return "btn_" + sound.resource;
 	}
 
+	function PreallocateAudios(size) {
+		var audios = [];
+		for (let i=0; i<size; i++) {
+			audios[i] = new Audio();
+		}
+		return audios;
+	}
+	
+	var AudioElementFactory = {
+		index: 0,
+		audios: PreallocateAudios(38),
+		CreateFromPool: function (sound) {
+			var audioElement = this.audios[this.index];
+			this.index = (this.index+1) % this.audios.length;
+			return audioElement;
+		},
+		CreateFromDocument: function(sound) {
+			return document.createElement('audio');
+		}
+	};
+
 	function MakeAudioElement(sound) {
-		var audioElement = document.createElement('audio');		
+		var audioElement = AudioElementFactory.CreateFromPool(sound);
 		var id = MakeAudioElementId(sound);		
 		audioElement.setAttribute('id', id);
 		audioElement.setAttribute('src', sound.resource);
-		audioElement.setAttribute('class', 'grid-item');	
+		audioElement.setAttribute('class', 'grid-item');
 		document.body.appendChild(audioElement);
 		return audioElement;
 	}
@@ -156,17 +177,8 @@ button {
 	class BoardSound {
 		constructor(sound, onClick, onCtrlClick, onAudioEnded) {
 			this.sound = sound;
-			this.audio = MakeAudioElement(sound);
 			this.button = MakeButtonElement(sound);
-
-			this.audio.onpause = () => { 	
-				this.button.className = ButtonClass(this.sound);
-				onAudioEnded(this.sound, this.audio);
-			};
-
-			this.audio.onplay = () => {
-				this.button.className = "playingButton";
-			};			
+			this.onAudioEnded = onAudioEnded;
 
 			this.button.onclick = () => {
 				if (event.ctrlKey)
@@ -179,13 +191,32 @@ button {
 				}
 			};			
 		}
+		
+		// Chrome 92 introduced a limitation on the number of audio elements that can be allocated
+		// on the same tab (75 for desktop, 40 for mobile): https://stackoverflow.com/a/68503181
+		// From now on, audio elements will be lazily created from a pool of 38 elements
+		GetAudio() {		
+			if (this.audio == null || this.audio.id != MakeAudioElementId(this.sound)) {
+				this.audio = MakeAudioElement(this.sound);
+				
+				this.audio.onpause = () => { 	
+					this.button.className = ButtonClass(this.sound);
+					this.onAudioEnded(this.sound, this.audio);
+				};
+
+				this.audio.onplay = () => {
+					this.button.className = "playingButton";
+				};			
+			}
+			return this.audio;
+		}
 
 		AppendTo(control) {
 			control.appendChild(this.button);
 		}
 		
 		Trigger() {
-			if (this.audio.paused) {
+			if (this.GetAudio().paused) {
 				this.Play();
 			}
 			else {
@@ -194,12 +225,14 @@ button {
 		}
 
 		Play() {
-			this.audio.play();
+			this.GetAudio().play();
 		}
 
 		Stop() {
-			this.audio.pause();
-			this.audio.currentTime = 0;
+			if (this.audio && !this.audio.paused) {
+				this.audio.pause();
+				this.audio.currentTime = 0;
+			}
 		}
 	}
 
@@ -534,10 +567,14 @@ button {
 
 	function LoadFavorites() {
 		var localfavs = localStorage.getItem("board-favs");
-		if (localfavs != null) {			
+		if (localfavs != null && localfavs != "") {			
 			return JSON.parse(localfavs);
 		}
 		return [];
+	}
+	
+	function ClearFavorites() {
+		localStorage.removeItem("board-favs");
 	}
 
 	function SaveFavorites(favs) {
@@ -589,7 +626,6 @@ button {
 		OnPlayList() {
 			if (this.isMakingCustomFilter)
 				return;
-
 			this.StopAll();
 			var sounds = shuffle(board.AvailableSounds());
 			var idx = 0;
