@@ -521,8 +521,6 @@ button {
 			new Sound("crux/EXTRA-che-ridi.mp3", "(extra) nino", ["extra"]),
 			new Sound("crux/EXTRA-hai-cagato.mp3", "(extra) hai cagato?", ["extra"]),
 			new Sound("crux/EXTRA-gates.mp3", "(extra) GATES", ["extra"]),
-			new Sound("crux/FELTRI-cafone-nell-anima.mp3", "(feltri) cafone nell'anima", ["extra", "feltri"]),
-			new Sound("crux/FELTRI-pistolino.mp3", "(feltri) pistolino", ["extra", "feltri"]),
 			
 			// jingles
 			new Sound("jingle/aborto.mp3", "aborto", ["jingle"]),
@@ -575,7 +573,14 @@ button {
 			new Sound("jingle/troie-in-diretta.mp3", "troie in diretta", ["jingle"]),
 			new Sound("jingle/trombata-ft-santa-esmeralda.mp3", "trombata ft. santa esmeralda", ["jingle"]),
 			new Sound("jingle/viva-la-libertà.mp3", "viva la libertà", ["jingle", "borghezio"]),			
-			new Sound("jingle/zuccaro.mp3", "zuccaro", ["jingle"])
+			new Sound("jingle/zuccaro.mp3", "zuccaro", ["jingle"]),
+
+			// feltri
+			new Sound("feltri/milano_vivaio_finocchi.mp3", "Milano è un vivaio di finocchi", ["feltri"]),
+			new Sound("feltri/sei_cafone_nellanima.mp3", "Sei cafone nell'anima", ["feltri"]),
+			new Sound("feltri/stai_zitto_pistolino.mp3", "Stai zitto pistolino", ["feltri"]),
+			new Sound("feltri/FELTRI-cafone-nell-anima.mp3", "cafone nell'anima", ["feltri"]),
+			new Sound("feltri/FELTRI-pistolino.mp3", "pistolino", ["feltri"]),
 		];		
 
 		repo = new SoundsRepository(MainSounds);
@@ -588,8 +593,10 @@ button {
 			document.getElementById("btn-play"),
 			document.getElementById("btn-crux"),
 			document.getElementById("btn-parenzo"),
+			document.getElementById("btn-feltri"),
 			document.getElementById("btn-custom"),
-			document.getElementById("btn-makecustom"));
+			document.getElementById("btn-makecustom")
+		);
 
 		CreateAllSoundsBoard();		
 	}
@@ -610,6 +617,11 @@ button {
 		board.Replace(cruxSounds.map(SoundId));
 	}
 	
+	function CreateFeltriBoard() {
+		var filteredSounds = MainSounds.filter(sound => sound.tags.includes("feltri"))
+		board.Replace(filteredSounds.map(SoundId))
+	}
+
 	function CreateParenzoBoard() {
 		var parenzoSounds = MainSounds.filter( (sound) => {
 			return sound.tags.includes("parenzo") && sound.tags.length==1;
@@ -639,7 +651,7 @@ button {
 	}
 
 	class HeaderManager {
-		constructor(soundRepo, stopBtn, fontBtn, filterAllBtn, filterJinglesBtn, playBtn, cruxBtn, parenzoBtn, customBtn, makeCustomBtn) {
+		constructor(soundRepo, stopBtn, fontBtn, filterAllBtn, filterJinglesBtn, playBtn, cruxBtn, parenzoBtn, feltriBtn, customBtn, makeCustomBtn) {
 			this.soundRepo = soundRepo;			
 			this.sizeTurnBig = true;
 			this.playlistGoing = false;
@@ -658,6 +670,7 @@ button {
 			filterJinglesBtn.onclick = CreateJinglesBoard;
 			cruxBtn.onclick = CreateCruxBoard;
 			parenzoBtn.onclick = CreateParenzoBoard;
+			feltriBtn.onclick = CreateFeltriBoard;
 		}
 
 		StopAll() {
@@ -753,6 +766,7 @@ button {
 <button class="btnAll" id="btn-all">Tutti</button>
 <button class="btnAll" id="btn-crux">Crux</button>
 <button class="btnAll" id="btn-parenzo">Parenzo</button>
+<button class="btnAll" id="btn-feltri">Feltri</button>
 <button class="btnAll" id="btn-jingles">Jingles</button>
 <div class="fav-group">
 	<button id="btn-custom">⭐ Preferiti</button>
