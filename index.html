@@ -13,13 +13,10 @@ h3 {
 }
 
 .grid-header {
-   display: flex;
-   gap: 1em;
-   margin: 0 0 1em 0;
-}
-
-.grid-header > * {
-	flex:  1 1 auto;
+   display: inline-grid;
+   grid-gap: 10px 10px;
+   grid-template-columns: 10% 10% 10% 7% 8% 12% 9% 10% 11%;
+   width: 100vw;  
 }
 
 .grid-container {
@@ -61,6 +58,11 @@ button {
 .parenzoButton {
 	background-color: #f4e6f7;
 	border: 2px solid #e27ef7;
+}
+	
+.feltriButton {
+	background-color: #0a58a6;
+	border: 2px solid #f5faff;
 }
 
 .btnStop {
@@ -173,6 +175,9 @@ button {
 		}
 		else if (sound.tags.includes("parenzo") && sound.tags.length == 1) {
 			return "parenzoButton";
+		}		
+		else if (sound.tags.includes("feltri") && sound.tags.length == 1) {
+			return "feltriButton";
 		}		
 		return "cruxButton";
 	}
@@ -511,7 +516,12 @@ button {
 			new Sound("parenzo/terza-dose.mp3", "terza dose", ["parenzo"]),
 			new Sound("parenzo/tutto-live.mp3", "tutto live", ["parenzo"]),
 			new Sound("parenzo/tv-vecchia.mp3", "tv vecchia", ["parenzo"]),
-
+			
+			// feltri
+			new Sound("feltri/milano_vivaio_finocchi.mp3", "Milano è un vivaio di finocchi", ["feltri"]),
+			new Sound("feltri/sei_cafone_nellanima.mp3", "sei cafone nell'anima", ["feltri"]),
+			new Sound("feltri/stai_zitto_pistolino.mp3", "stai zitto pistolino", ["feltri"]),
+			
 			// extras
 			new Sound("crux/EXTRA-che-palle.mp3", "(extra) che palle", ["extra"]),
 			new Sound("crux/EXTRA-il-signor-giancarlo.mp3", "(extra) il signor giancarlo", ["extra"]),
@@ -576,14 +586,7 @@ button {
 			new Sound("jingle/troie-in-diretta.mp3", "troie in diretta", ["jingle"]),
 			new Sound("jingle/trombata-ft-santa-esmeralda.mp3", "trombata ft. santa esmeralda", ["jingle"]),
 			new Sound("jingle/viva-la-libertà.mp3", "viva la libertà", ["jingle", "borghezio"]),			
-			new Sound("jingle/zuccaro.mp3", "zuccaro", ["jingle"]),
-
-			// feltri
-			new Sound("feltri/milano_vivaio_finocchi.mp3", "Milano è un vivaio di finocchi", ["feltri"]),
-			new Sound("feltri/sei_cafone_nellanima.mp3", "sei cafone nell'anima", ["feltri"]),
-			new Sound("feltri/stai_zitto_pistolino.mp3", "stai zitto pistolino", ["feltri"]),
-			new Sound("feltri/FELTRI-cafone-nell-anima.mp3", "cafone nell'anima", ["feltri"]),
-			new Sound("feltri/FELTRI-pistolino.mp3", "pistolino", ["feltri"]),
+			new Sound("jingle/zuccaro.mp3", "zuccaro", ["jingle"]),			
 		];		
 
 		repo = new SoundsRepository(MainSounds);
@@ -770,7 +773,7 @@ button {
 <button class="btnAll" id="btn-crux">Crux</button>
 <button class="btnAll" id="btn-parenzo">Parenzo</button>
 <button class="btnAll" id="btn-feltri">Feltri</button>
-<button class="btnAll" id="btn-jingles">Jingles</button>
+<button class="btnAll" id="btn-jingles">🎵 Jingles</button>
 <div class="fav-group">
 	<button id="btn-custom">⭐ Preferiti</button>
 	<button id="btn-makecustom">...</button>
