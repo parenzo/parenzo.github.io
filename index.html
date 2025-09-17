@@ -200,7 +200,7 @@ button {
 	}
 
 	async function shareAudioFile(sound) {		
-		const audioUrl = window.location.origin + sound.resource;
+		const audioUrl = window.location.origin + "/" + sound.resource;
 
 		try {
 			const response = await fetch(audioUrl);
