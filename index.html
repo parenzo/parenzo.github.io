@@ -224,7 +224,7 @@ button {
 	}
 
 	class BoardSound {
-		constructor(sound, onClick, onCtrlClick, onAudioEnded) {
+		constructor(sound, onClick, onDoubleClick, onCtrlClick, onAudioEnded) {
 			this.sound = sound;
 			this.button = MakeButtonElement(sound);
 			this.onAudioEnded = onAudioEnded;
@@ -234,8 +234,7 @@ button {
 			this.button.onclick = (event) => {
 				const now = Date.now();
 				if (now - lastTap < 300) {
-					// Double-tap => share
-					shareAudioFile(this.sound);
+					onDoubleClick(this.sound, this.button);										
 					lastTap = 0;
 					event.preventDefault();
 					return;
@@ -304,6 +303,7 @@ button {
 				var boardSound = new BoardSound(
 					sound, 
 					(sound, button) => { this.onButtonClick(sound, button); },
+					(sound, button) => { this.StopAll(); shareAudioFile(sound); },
 					(sound, button) => { this.StopAll(); this.onButtonClick(sound, button); },
 					(s, a) => { 
 						for (var f in this.onAudioEnded){
@@ -587,7 +587,6 @@ button {
 			new Sound("crux/EXTRA-io-non-mi-presto-a-queste-stronzate.mp3", "(extra) io non mi presto a queste stronzate", ["extra"]),
 			new Sound("crux/EXTRA-deluca-dove-cazzo-vai.mp3", "(extra) sindaco de luca: dove cazzo vai?", ["extra"]),
 			new Sound("crux/EXTRA-deluca-lanciafiamme.mp3", "(extra) presidente de luca: lanciafiamme", ["extra"]),
-			new Sound("crux/EXTRA-enzino.mp3", "(extra) signor enzino", ["extra"]),
 			new Sound("crux/EXTRA-shock.mp3", "(extra) renzi: shock", ["extra"]),
 			new Sound("crux/mauro.mp3", "(extra) maurone", ["extra"]),
 			new Sound("crux/EXTRA-che-ridi.mp3", "(extra) nino", ["extra"]),
@@ -599,7 +598,8 @@ button {
 			new Sound("crux/EXTRA-problemi.mp3", "(extra) problemi", ["extra"]),
 			new Sound("crux/EXTRA-problemi-duro.mp3", "(extra) problemi v2", ["extra"]),
 			new Sound("crux/EXTRA-problemi-crescendo.mp3", "(extra) problemi v3", ["extra"]),
-			
+			new Sound("crux/EXTRA-enzino.mp3", "(extra) signor enzino", ["extra"]),
+
 			// jingles
 			new Sound("jingle/a-bariso.mp3", "a barisò", ["jingle"]),
 			new Sound("jingle/aborto.mp3", "aborto", ["jingle"]),
